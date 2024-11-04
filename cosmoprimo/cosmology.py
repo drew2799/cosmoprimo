@@ -1084,7 +1084,7 @@ class Cosmology(BaseCosmology):
         if 'Omega_m' in params and 'fb' in params:
             nonrelativistic_ncdm = (sum(BaseEngine._get_rho_ncdm(params, z=0)) - 3 * sum(BaseEngine._get_p_ncdm(params, z=0))) / constants.rho_crit_over_Msunph_per_Mpcph3
             params['Omega_b'] = params['fb'] * params['Omega_m']
-            params['Omega_cdm'] = (1 - params['fb']) * params['Omega_m'] - nonrelativistic_ncdm
+            params['Omega_cdm'] = (1 - params.pop('fb')) * params.pop('Omega_m') - nonrelativistic_ncdm
 
         defaults = {'w0_fld': -1., 'wa_fld': 0., 'cs2_fld': 1.}
         for name, default in defaults.items():
