@@ -662,8 +662,8 @@ class Cosmology(BaseCosmology):
 
     """Cosmology, defined as a set of parameters (and possibly a current engine attached to it)."""
 
-    _default_cosmological_parameters = dict(h=0.7, Omega_cdm=0.25, Omega_b=0.05, Omega_k=0., sigma8=0.8, k_pivot=0.05, n_s=0.96, alpha_s=0., beta_s=0.,
-                                            r=0., n_t='scc', alpha_t='scc', T_cmb=constants.TCMB,
+    _default_cosmological_parameters = dict(h=0.7, Omega_cdm=0.25, Omega_b=0.05, Omega_k=0., sigma8=0.8, k_pivot=0.05, n_s=0.96,
+                                            alpha_s=0., beta_s=0., r=0., n_t='scc', alpha_t='scc', T_cmb=constants.TCMB,
                                             m_ncdm=None, neutrino_hierarchy=None, T_ncdm_over_cmb=constants.TNCDM_OVER_CMB, N_eff=constants.NEFF,
                                             tau_reio=0.06, reionization_width=0.5, A_L=1.0, w0_fld=-1., wa_fld=0., cs2_fld=1.)
     _default_calculation_parameters = dict(non_linear='', modes='s', lensing=False, z_pk=None, kmax_pk=10., ellmax_cl=2500, YHe='BBN', use_ppf=True)
@@ -675,7 +675,9 @@ class Cosmology(BaseCosmology):
                                     ('N_ur', 'Omega_ur', 'omega_ur', 'N_eff'),
                                     ('m_ncdm', 'Omega_ncdm', 'omega_ncdm'),
                                     ('A_s', 'logA', 'sigma8'),
-                                    ('tau_reio', 'z_reio')]
+                                    ('tau_reio', 'z_reio'),
+                                    ('fb', 'Omega_b', 'omega_b'),
+                                    ('fb', 'Omega_cdm', 'omega_cdm', 'Omega_c', 'omega_c')]
     _alias_parameters = {'omega_b': ('ombh2',), 'omega_cdm': ('omch2',), 'Omega_k': ('omk',), 'm_ncdm': ('mnu',), 'N_eff': ('nnu',),
                         'n_s': ('ns',), 'alpha_s': ('nrun',), 'beta_s': ('nrunrun',), 'tau_reio': ('tau',),
                         'Omega_m': ('Omega0_m',), 'Omega_cdm': ('Omega0_cdm', 'Omega_c'),
@@ -1075,9 +1077,14 @@ class Cosmology(BaseCosmology):
         if 0. not in params['z_pk']:
             params['z_pk'] = np.insert(params['z_pk'], 0, 0.)  # in order to normalise CAMB power spectrum with sigma8
 
-        if 'Omega_m' in params:
+        if 'Omega_m' in params and 'fb' not in params:
             nonrelativistic_ncdm = (sum(BaseEngine._get_rho_ncdm(params, z=0)) - 3 * sum(BaseEngine._get_p_ncdm(params, z=0))) / constants.rho_crit_over_Msunph_per_Mpcph3
             params['Omega_cdm'] = params.pop('Omega_m') - params['Omega_b'] - nonrelativistic_ncdm
+
+        if 'Omega_m' in params and 'fb' in params:
+            nonrelativistic_ncdm = (sum(BaseEngine._get_rho_ncdm(params, z=0)) - 3 * sum(BaseEngine._get_p_ncdm(params, z=0))) / constants.rho_crit_over_Msunph_per_Mpcph3
+            params['Omega_b'] = params['fb'] * params['Omega_m']
+            params['Omega_cdm'] = (1 - params['fb']) * params['Omega_m'] - nonrelativistic_ncdm
 
         defaults = {'w0_fld': -1., 'wa_fld': 0., 'cs2_fld': 1.}
         for name, default in defaults.items():
