@@ -337,6 +337,8 @@ class BaseCosmology(BaseClass):
                 return sum(self.get('Omega_pncdm'))
             if name == 'Omega_m':
                 return self.get('Omega_b') + self.get('Omega_cdm') + self.get('Omega_ncdm_tot') - self.get('Omega_pncdm_tot')
+            if name == 'gamma_b':
+                return self.get('Omega_b')/(self.get('Omega_b')+self.get('Omega_cdm'))
             if name == 'Omega_de':
                 return 1. - sum(self.get(name) for name in ['Omega_cdm', 'Omega_b', 'Omega_g', 'Omega_ur', 'Omega_ncdm_tot', 'Omega_k'])
             if name == 'Omega_Lambda':
@@ -676,14 +678,15 @@ class Cosmology(BaseCosmology):
                                     ('m_ncdm', 'Omega_ncdm', 'omega_ncdm'),
                                     ('A_s', 'logA', 'sigma8'),
                                     ('tau_reio', 'z_reio'),
-                                    ('fb', 'Omega_b', 'omega_b'),
-                                    ('fb', 'Omega_cdm', 'omega_cdm', 'Omega_c', 'omega_c')]
+                                    ('Omega_b', 'omega_b'),
+                                    ('Omega_cdm', 'omega_cdm', 'Omega_c', 'omega_c')]
     _alias_parameters = {'omega_b': ('ombh2',), 'omega_cdm': ('omch2',), 'Omega_k': ('omk',), 'm_ncdm': ('mnu',), 'N_eff': ('nnu',),
                         'n_s': ('ns',), 'alpha_s': ('nrun',), 'beta_s': ('nrunrun',), 'tau_reio': ('tau',),
                         'Omega_m': ('Omega0_m',), 'Omega_cdm': ('Omega0_cdm', 'Omega_c'),
                         'Omega_b': ('Omega0_b',), 'Omega_k': ('Omega0_k',), 'Omega_ur': ('Omega0_ur',),
                         'Omega_ncdm': ('Omega0_ncdm',), 'Omega_fld': ('Omega0_fld',), 'T_cmb': ('T0_cmb',),
-                        'Omega_g': ('Omega0_g',), 'logA': ('ln10^10A_s', 'ln10^{10}A_s', 'ln_A_s_1e10')}
+                        'Omega_g': ('Omega0_g',), 'logA': ('ln10^10A_s', 'ln10^{10}A_s', 'ln_A_s_1e10'),
+                        'gamma_b': ('gammab', 'Gamma_b')}
 
     def __init__(self, engine=None, extra_params=None, **params):
         r"""
@@ -1077,14 +1080,14 @@ class Cosmology(BaseCosmology):
         if 0. not in params['z_pk']:
             params['z_pk'] = np.insert(params['z_pk'], 0, 0.)  # in order to normalise CAMB power spectrum with sigma8
 
-        if 'Omega_m' in params and 'fb' not in params:
+        if 'Omega_m' in params: #and 'gamma_b' not in params:
             nonrelativistic_ncdm = (sum(BaseEngine._get_rho_ncdm(params, z=0)) - 3 * sum(BaseEngine._get_p_ncdm(params, z=0))) / constants.rho_crit_over_Msunph_per_Mpcph3
             params['Omega_cdm'] = params.pop('Omega_m') - params['Omega_b'] - nonrelativistic_ncdm
 
-        if 'Omega_m' in params and 'fb' in params:
-            nonrelativistic_ncdm = (sum(BaseEngine._get_rho_ncdm(params, z=0)) - 3 * sum(BaseEngine._get_p_ncdm(params, z=0))) / constants.rho_crit_over_Msunph_per_Mpcph3
-            params['Omega_b'] = params['fb'] * params['Omega_m']
-            params['Omega_cdm'] = (1 - params.pop('fb')) * params.pop('Omega_m') - nonrelativistic_ncdm
+        #if 'Omega_m' in params and 'gamma_b' in params:
+        #    nonrelativistic_ncdm = (sum(BaseEngine._get_rho_ncdm(params, z=0)) - 3 * sum(BaseEngine._get_p_ncdm(params, z=0))) / constants.rho_crit_over_Msunph_per_Mpcph3
+        #    params['Omega_b'] = params['gamma_b'] * params['Omega_m']
+        #    params['Omega_cdm'] = (1 - params.pop('gamma_b')) * params.pop('Omega_m') - nonrelativistic_ncdm
 
         defaults = {'w0_fld': -1., 'wa_fld': 0., 'cs2_fld': 1.}
         for name, default in defaults.items():
@@ -1665,7 +1668,13 @@ class BaseBackground(BaseSection):
         non-relativistic part of massive neutrino, unitless.
         """
         return self.rho_m(z) / self.rho_crit(z)
-
+    
+    @utils.flatarray()
+    def gamma_b(self, z):
+        r"""
+        """
+        return self.rho_b(z) / (self.rho_b(z)+self.rho_cdm(z))
+    
     @utils.flatarray()
     def Omega_ncdm(self, z, species=None):
         r"""

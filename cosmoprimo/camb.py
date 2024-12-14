@@ -106,6 +106,8 @@ class CambEngine(BaseEngine):
             all_params = self._extra_params | base_params
 
             non_linear = all_params.pop('non_linear')
+            if 'gamma_b' in all_params:
+                gamma_b = all_params.pop('gamma_b')
 
             if non_linear:
                 self._camb_params.NonLinear = self.camb.model.NonLinear_both
