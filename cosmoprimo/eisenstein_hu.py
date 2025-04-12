@@ -277,6 +277,7 @@ class Transfer(BaseSection):
         T_b_T0 = T0(T_c_ln_nobeta, T_c_C_noalpha)
         self.T_b_1 = T_b_T0 / (1 + (ks / 5.2)**2)
         self.T_b_2 = self._alpha_b / (1 + (self._beta_b / ks)**3) * self._np.exp(-(k / self._k_silk) ** 1.4)
+        self.Tb_env = self.T_b_1+self.T_b_2
         self.T_b = self._np.sinc(ks_tilde / np.pi) * (self.T_b_1 + self.T_b_2)
 
         # EH eq. 16
