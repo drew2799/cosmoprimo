@@ -267,7 +267,7 @@ class Transfer(BaseSection):
         def T0(a, b):
             return a / (a + b * q**2)
 
-        T_c = T_c_f * T0(T_c_ln_beta, T_c_C_noalpha) + (1 - T_c_f) * T0(T_c_ln_beta, T_c_C_alpha)
+        self.T_c = T_c_f * T0(T_c_ln_beta, T_c_C_noalpha) + (1 - T_c_f) * T0(T_c_ln_beta, T_c_C_alpha)
 
         # EH eq. 22
         s_tilde = self._rs_drag * (1 + (self._beta_node / ks)**3) ** (-1. / 3.)
@@ -275,12 +275,12 @@ class Transfer(BaseSection):
 
         # EH eq. 21
         T_b_T0 = T0(T_c_ln_nobeta, T_c_C_noalpha)
-        T_b_1 = T_b_T0 / (1 + (ks / 5.2)**2)
-        T_b_2 = self._alpha_b / (1 + (self._beta_b / ks)**3) * self._np.exp(-(k / self._k_silk) ** 1.4)
-        T_b = self._np.sinc(ks_tilde / np.pi) * (T_b_1 + T_b_2)
+        self.T_b_1 = T_b_T0 / (1 + (ks / 5.2)**2)
+        self.T_b_2 = self._alpha_b / (1 + (self._beta_b / ks)**3) * self._np.exp(-(k / self._k_silk) ** 1.4)
+        self.T_b = self._np.sinc(ks_tilde / np.pi) * (self.T_b_1 + self.T_b_2)
 
         # EH eq. 16
-        return self._frac_b * T_b + (1 - self._frac_b) * T_c
+        return self._frac_b * self.T_b + (1 - self._frac_b) * self.T_c
 
 
 class Fourier(BaseSection):
