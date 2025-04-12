@@ -131,7 +131,7 @@ def AbacusSummit_params(name=None, filename=_AbacusSummit_params_filename, param
     return toret
 
 
-def AbacusSummit(name=0, engine='class', precision=None, extra_params=None, **params):
+def AbacusSummit(name=0, engine='camb', precision=None, extra_params=None, **params):
     """
     Initialize :class:`Cosmology` with AbacusSummit cosmological parameters.
 
@@ -192,7 +192,7 @@ def AbacusSummit(name=0, engine='class', precision=None, extra_params=None, **pa
     return cosmo.clone(**params)
 
 
-def AbacusSummitBase(engine='class', precision=None, extra_params=None, **params):
+def AbacusSummitBase(engine='camb', precision=None, extra_params=None, **params):
     """
     Initialize :class:`Cosmology` with base AbacusSummit cosmological parameters (Planck2018, base_plikHM_TTTEEE_lowl_lowE_lensing mean).
 
