@@ -1717,6 +1717,12 @@ class BaseBackground(BaseSection):
     def efunc(self, z):
         r"""Function giving :math:`E(z)`, where the Hubble parameter is defined as :math:`H(z) = H_{0} E(z)`, unitless."""
         return self._np.sqrt(self.rho_crit(z) * (1 + z)**3 / constants.rho_crit_over_Msunph_per_Mpcph3)
+    
+    @utils.flatarray()
+    def my_efunc(self, Omega_m, z):
+        rho_m_z = Omega_m*np.ones_like(z) * constants.rho_crit_over_Msunph_per_Mpcph3 + cosmo.rho_ncdm_tot(z) - 3. * cosmo.p_ncdm_tot(z)
+        rho_crit_z = rho_m_z + cosmo.rho_g(z) + cosmo.rho_ur(z) + cosmo.rho_de(z) + cosmo.rho_k(z)
+        return np.sqrt(rho_crit_z * (1 + z)**3 / constants.rho_crit_over_Msunph_per_Mpcph3)
 
     @utils.flatarray()
     def hubble_function(self, z):
